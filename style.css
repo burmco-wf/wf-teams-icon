@@ -1,0 +1,169 @@
+/* Custom TTF font loaded separately */
+@font-face {
+  font-family: 'CBHand';
+  src: url('CBHand.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a1a2e;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  font-family: sans-serif;
+  gap: 32px;
+}
+
+h1 {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.card canvas {
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card:hover canvas {
+  transform: scale(1.08);
+  box-shadow: 0 8px 28px rgba(255,153,32,0.5);
+}
+
+.card-label {
+  color: #ccc;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.card-sub {
+  color: #888;
+  font-size: 11px;
+  margin-top: -8px;
+}
+
+.download-btn {
+  padding: 6px 16px;
+  font-size: 12px;
+  background: rgba(255,153,32,0.2);
+  color: #ff9920;
+  border: 1px solid #ff9920;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.download-btn:hover { background: rgba(255,153,32,0.4); }
+
+p.hint {
+  color: #555;
+  font-size: 13px;
+}
+
+.config-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-end;
+  padding: 20px 24px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  width: 100%;
+  max-width: 900px;
+}
+
+.config-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.config-group label {
+  color: #aaa;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.config-group input[type="color"] {
+  width: 48px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  background: #2a2a4a;
+}
+
+.config-group input[type="number"],
+.config-group input[type="range"],
+.config-group input[type="text"] {
+  width: 80px;
+  padding: 8px 10px;
+  background: #2a2a4a;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+}
+
+.config-group input[type="text"] { width: 100px; }
+
+.config-group input[type="range"] {
+  width: 120px;
+  padding: 0;
+}
+
+.config-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #ff9920;
+  cursor: pointer;
+}
+
+.config-group .checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.config-group .checkbox-row label { margin: 0; text-transform: none; }
+
+.config-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.config-row .config-group { flex: 0 0 auto; }
+
+.font-scale-value,
+.slider-value {
+  color: #ccc;
+  font-size: 12px;
+}
