@@ -63,6 +63,75 @@ function saveConfig() {
   } catch (e) {}
 }
 
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+}
+
+function extractColorsFromImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, w, h).data;
+      const margin = Math.max(1, Math.floor(Math.min(w, h) * 0.18));
+
+      const sample = (x, y) => {
+        const i = (Math.min(h - 1, Math.max(0, y)) * w + Math.min(w - 1, Math.max(0, x))) * 4;
+        return { r: data[i], g: data[i + 1], b: data[i + 2], a: data[i + 3] };
+      };
+      const avg = (pixels) => {
+        const n = pixels.length;
+        let r = 0, g = 0, b = 0, count = 0;
+        pixels.forEach(p => {
+          if (p.a > 128) { r += p.r; g += p.g; b += p.b; count++; }
+        });
+        return count ? { r: r / count, g: g / count, b: b / count } : null;
+      };
+
+      const cornerPixels = [
+        sample(margin, margin),
+        sample(w - 1 - margin, margin),
+        sample(margin, h - 1 - margin),
+        sample(w - 1 - margin, h - 1 - margin)
+      ];
+      const bg = avg(cornerPixels);
+      if (!bg) return reject(new Error('Could not read background'));
+
+      const centerLeft = Math.floor(w * 0.35);
+      const centerRight = Math.ceil(w * 0.65);
+      const centerTop = Math.floor(h * 0.35);
+      const centerBottom = Math.ceil(h * 0.65);
+      const centerPixels = [];
+      for (let y = centerTop; y < centerBottom; y += 2) {
+        for (let x = centerLeft; x < centerRight; x += 2) {
+          centerPixels.push(sample(x, y));
+        }
+      }
+      const dist = (p, q) => Math.sqrt((p.r - q.r) ** 2 + (p.g - q.g) ** 2 + (p.b - q.b) ** 2);
+      const textPixels = centerPixels.filter(p => p.a > 128 && dist(p, bg) > 30);
+      const textColor = textPixels.length ? avg(textPixels) : bg;
+
+      resolve({
+        bg: rgbToHex(bg.r, bg.g, bg.b),
+        textColor: rgbToHex(textColor.r, textColor.g, textColor.b)
+      });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load image'));
+    };
+    img.src = url;
+  });
+}
+
 function loadConfig() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -218,6 +287,22 @@ function setupConfigListeners() {
   });
 
   sliderNumPairs.forEach(({ slider, num }) => syncSliderToNum(slider, num));
+
+  const matchInput = document.getElementById('cfgMatchImage');
+  if (matchInput) {
+    matchInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file || !file.type.startsWith('image/')) return;
+      extractColorsFromImage(file).then(({ bg, textColor }) => {
+        const bgEl = document.getElementById('cfgBg');
+        const textEl = document.getElementById('cfgText');
+        if (bgEl) bgEl.value = bg;
+        if (textEl) textEl.value = textColor;
+        buildGrid();
+        saveConfig();
+      }).catch(() => {}).finally(() => { matchInput.value = ''; });
+    });
+  }
 }
 
 function loadAllFonts() {

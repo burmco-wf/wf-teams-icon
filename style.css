@@ -152,6 +152,29 @@ p.hint {
   flex-shrink: 0;
 }
 
+.config-group input[type="file"] {
+  width: 100%;
+  max-width: 180px;
+  padding: 6px 8px;
+  font-size: 12px;
+  color: #ccc;
+  background: #2a2a4a;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.config-group input[type="file"]::file-selector-button {
+  margin-right: 8px;
+  padding: 4px 10px;
+  background: rgba(255,153,32,0.25);
+  color: #ff9920;
+  border: 1px solid #ff9920;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
 .config-group input[type="checkbox"] {
   width: 20px;
   height: 20px;
