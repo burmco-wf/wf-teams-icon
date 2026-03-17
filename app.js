@@ -14,7 +14,7 @@ const defaultConfig = {
 };
 
 const fonts = [
-  { name: 'CBHand', label: 'CB Hand', sub: 'Custom TTF font', weight: 'normal' },
+  { name: 'Segoe UI', label: 'Segoe UI', sub: 'Teams default', weight: '600', fontFamily: '"Segoe UI", "Segoe UI Web", Tahoma, sans-serif' },
   { name: 'Comic Sans MS', label: 'Comic Sans', sub: 'The classic', weight: 'bold' },
   { name: 'Bangers', label: 'Bangers', sub: 'Comic-Book Style', weight: 'normal' },
   { name: 'Fredoka One', label: 'Fredoka One', sub: 'Round & friendly', weight: 'normal' },
@@ -25,6 +25,8 @@ const fonts = [
   { name: 'Rubik Bubbles', label: 'Rubik Bubbles', sub: 'Bubble effect', weight: 'normal' },
   { name: 'Caveat', label: 'Caveat', sub: 'Handwritten', weight: '700' },
   { name: 'Righteous', label: 'Righteous', sub: 'Retro funky', weight: 'normal' },
+  { name: 'CBHandwritten', label: 'CB Handwritten', sub: 'Custom TTF font', weight: 'normal' },
+
 ];
 
 function getConfig() {
@@ -80,8 +82,6 @@ function loadConfig() {
     const italicEl = document.getElementById('cfgItalic');
     if (boldEl) boldEl.checked = !!cfg.bold;
     if (italicEl) italicEl.checked = !!cfg.italic;
-    const scaleVal = document.getElementById('cfgFontScaleVal');
-    if (scaleVal) scaleVal.textContent = (cfg.fontScale ?? document.getElementById('cfgFontScale')?.value ?? 100) + '%';
   } catch (e) {}
 }
 
@@ -101,13 +101,15 @@ function drawAvatar(font, opts) {
              font.name === 'Lobster' ? 52 :
              font.name === 'Caveat' ? 62 :
              font.name === 'Bangers' ? 68 :
-             font.name === 'CBHand' ? 54 : 56;
+             font.name === 'CBHand' ? 54 :
+             font.name === 'Segoe UI' ? 52 : 56;
   const fontSize = Math.round(baseFontSize * fontScale);
 
   const weight = bold ? 'bold' : (font.weight || 'normal');
   const style = italic ? 'italic' : (font.style || 'normal');
+  const family = font.fontFamily || `"${font.name}", cursive`;
   ctx.fillStyle = textColor;
-  ctx.font = `${style} ${weight} ${fontSize}px "${font.name}", cursive`;
+  ctx.font = `${style} ${weight} ${fontSize}px ${family}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
@@ -159,43 +161,63 @@ function buildGrid() {
   });
 }
 
+const sliderNumPairs = [
+  { slider: 'cfgFontScale', num: 'cfgFontScaleNum', min: 50, max: 150 },
+  { slider: 'cfgOffsetX', num: 'cfgOffsetXNum', min: -50, max: 50 },
+  { slider: 'cfgOffsetY', num: 'cfgOffsetYNum', min: -50, max: 50 },
+  { slider: 'cfgRotate', num: 'cfgRotateNum', min: -180, max: 180 }
+];
+
+function syncSliderToNum(sliderId, numId) {
+  const s = document.getElementById(sliderId);
+  const n = document.getElementById(numId);
+  if (s && n) n.value = s.value;
+}
+
+function syncNumToSlider(sliderId, numId, min, max) {
+  const s = document.getElementById(sliderId);
+  const n = document.getElementById(numId);
+  if (!s || !n) return;
+  let val = Number(n.value);
+  if (Number.isNaN(val)) val = min;
+  val = Math.min(max, Math.max(min, val));
+  n.value = val;
+  s.value = val;
+}
+
 function setupConfigListeners() {
   const inputs = ['cfgTextValue', 'cfgBg', 'cfgText', 'cfgFontScale', 'cfgSize', 'cfgOffsetX', 'cfgOffsetY', 'cfgRotate', 'cfgBold', 'cfgItalic'];
   inputs.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input', () => {
-      updateSliderDisplay(id, el);
+      if (sliderNumPairs.some(p => p.slider === id)) syncSliderToNum(id, sliderNumPairs.find(p => p.slider === id).num);
       buildGrid();
       saveConfig();
     });
     el.addEventListener('change', () => {
-      updateSliderDisplay(id, el);
+      if (sliderNumPairs.some(p => p.slider === id)) syncSliderToNum(id, sliderNumPairs.find(p => p.slider === id).num);
       buildGrid();
       saveConfig();
     });
   });
-  document.getElementById('cfgFontScaleVal').textContent = document.getElementById('cfgFontScale').value + '%';
-  document.getElementById('cfgOffsetXVal').textContent = document.getElementById('cfgOffsetX').value;
-  document.getElementById('cfgOffsetYVal').textContent = document.getElementById('cfgOffsetY').value;
-  document.getElementById('cfgRotateVal').textContent = document.getElementById('cfgRotate').value + '°';
-}
 
-function updateSliderDisplay(id, el) {
-  const val = el.value;
-  if (id === 'cfgFontScale') {
-    const span = document.getElementById('cfgFontScaleVal');
-    if (span) span.textContent = val + '%';
-  } else if (id === 'cfgOffsetX') {
-    const span = document.getElementById('cfgOffsetXVal');
-    if (span) span.textContent = val;
-  } else if (id === 'cfgOffsetY') {
-    const span = document.getElementById('cfgOffsetYVal');
-    if (span) span.textContent = val;
-  } else if (id === 'cfgRotate') {
-    const span = document.getElementById('cfgRotateVal');
-    if (span) span.textContent = val + '°';
-  }
+  sliderNumPairs.forEach(({ slider, num, min, max }) => {
+    const numEl = document.getElementById(num);
+    if (!numEl) return;
+    numEl.addEventListener('input', () => {
+      syncNumToSlider(slider, num, min, max);
+      buildGrid();
+      saveConfig();
+    });
+    numEl.addEventListener('change', () => {
+      syncNumToSlider(slider, num, min, max);
+      buildGrid();
+      saveConfig();
+    });
+  });
+
+  sliderNumPairs.forEach(({ slider, num }) => syncSliderToNum(slider, num));
 }
 
 function loadAllFonts() {

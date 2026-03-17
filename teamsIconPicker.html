@@ -25,8 +25,10 @@
     </div>
     <div class="config-group">
       <label>Font size %</label>
-      <input type="range" id="cfgFontScale" min="50" max="150" value="100" step="5">
-      <span id="cfgFontScaleVal" class="font-scale-value">100%</span>
+      <div class="slider-input-row">
+        <input type="range" id="cfgFontScale" min="50" max="150" value="100" step="5">
+        <input type="number" id="cfgFontScaleNum" min="50" max="150" value="100" step="5" aria-label="Font size">
+      </div>
     </div>
     <div class="config-group">
       <label>Image size (px)</label>
@@ -34,18 +36,24 @@
     </div>
     <div class="config-group">
       <label>Offset X</label>
-      <input type="range" id="cfgOffsetX" min="-50" max="50" value="0" step="1">
-      <span id="cfgOffsetXVal" class="slider-value">0</span>
+      <div class="slider-input-row">
+        <input type="range" id="cfgOffsetX" min="-50" max="50" value="0" step="1">
+        <input type="number" id="cfgOffsetXNum" min="-50" max="50" value="0" step="1" aria-label="Offset X">
+      </div>
     </div>
     <div class="config-group">
       <label>Offset Y</label>
-      <input type="range" id="cfgOffsetY" min="-50" max="50" value="0" step="1">
-      <span id="cfgOffsetYVal" class="slider-value">0</span>
+      <div class="slider-input-row">
+        <input type="range" id="cfgOffsetY" min="-50" max="50" value="0" step="1">
+        <input type="number" id="cfgOffsetYNum" min="-50" max="50" value="0" step="1" aria-label="Offset Y">
+      </div>
     </div>
     <div class="config-group">
       <label>Rotation (°)</label>
-      <input type="range" id="cfgRotate" min="-180" max="180" value="0" step="1">
-      <span id="cfgRotateVal" class="slider-value">0°</span>
+      <div class="slider-input-row">
+        <input type="range" id="cfgRotate" min="-180" max="180" value="0" step="1">
+        <input type="number" id="cfgRotateNum" min="-180" max="180" value="0" step="1" aria-label="Rotation">
+      </div>
     </div>
     <div class="config-group">
       <label>Font style</label>
