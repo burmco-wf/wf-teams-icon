@@ -55,6 +55,13 @@
         <input type="number" id="cfgRotateNum" min="-180" max="180" value="0" step="1" aria-label="Rotation">
       </div>
     </div>
+    <div class="config-group custom-font-group">
+      <label>Custom font (saved locally)</label>
+      <div class="custom-font-row">
+        <input type="file" id="cfgCustomFontUpload" accept=".ttf,.otf,font/ttf,font/otf" title="Upload a TTF or OTF font; stored in browser and persists across reloads">
+        <button type="button" id="cfgCustomFontRemove" class="remove-font-btn" title="Remove saved custom font" style="display: none;">Remove</button>
+      </div>
+    </div>
     <div class="config-group">
       <label>Match from image</label>
       <input type="file" id="cfgMatchImage" accept="image/*" title="Upload a Teams avatar to copy its background and text colors">

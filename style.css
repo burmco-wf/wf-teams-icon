@@ -5,6 +5,12 @@
   font-weight: normal;
   font-style: normal;
 }
+@font-face {
+  font-family: 'Upheavtt';
+  src: url('fonts/upheavtt.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -173,6 +179,32 @@ p.hint {
   border-radius: 6px;
   cursor: pointer;
   font-size: 11px;
+}
+
+.custom-font-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.custom-font-row input[type="file"] {
+  flex: 1;
+  min-width: 0;
+}
+
+.remove-font-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  background: rgba(200, 80, 80, 0.25);
+  color: #e88;
+  border: 1px solid rgba(200, 80, 80, 0.6);
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.remove-font-btn:hover {
+  background: rgba(200, 80, 80, 0.4);
 }
 
 .config-group input[type="checkbox"] {

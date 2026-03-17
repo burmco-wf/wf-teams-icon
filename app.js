@@ -25,9 +25,95 @@ const fonts = [
   { name: 'Rubik Bubbles', label: 'Rubik Bubbles', sub: 'Bubble effect', weight: 'normal' },
   { name: 'Caveat', label: 'Caveat', sub: 'Handwritten', weight: '700' },
   { name: 'Righteous', label: 'Righteous', sub: 'Retro funky', weight: 'normal' },
-  { name: 'CBHandwritten', label: 'CB Handwritten', sub: 'Custom TTF font', weight: 'normal' },
-
+  { name: 'CBHandwritten', label: 'CB Handwritten', sub: 'My handwriting', weight: 'normal' },
+  { name: 'Upheavtt', label: 'Upheavtt', sub: 'The Binding of Isaac!', weight: 'normal' },
 ];
+
+const IDB_NAME = 'IconMaker';
+const IDB_STORE = 'customFont';
+let customUploadedFont = null;
+let customFontObjectURL = null;
+let customFontStyleEl = null;
+
+function openFontDB() {
+  return new Promise((resolve, reject) => {
+    const r = indexedDB.open(IDB_NAME, 1);
+    r.onerror = () => reject(r.error);
+    r.onsuccess = () => resolve(r.result);
+    r.onupgradeneeded = (e) => e.target.result.createObjectStore(IDB_STORE);
+  });
+}
+
+function saveCustomFontToIDB(blob, format) {
+  return openFontDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      const store = tx.objectStore(IDB_STORE);
+      store.put({ blob, format }, 'font');
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  });
+}
+
+function loadCustomFontFromIDB() {
+  return openFontDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const store = tx.objectStore(IDB_STORE);
+      const r = store.get('font');
+      r.onsuccess = () => resolve(r.result || null);
+      r.onerror = () => reject(r.error);
+    });
+  });
+}
+
+function deleteCustomFontFromIDB() {
+  return openFontDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      const store = tx.objectStore(IDB_STORE);
+      store.delete('font');
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  });
+}
+
+function removeCustomFont() {
+  if (customFontObjectURL) {
+    URL.revokeObjectURL(customFontObjectURL);
+    customFontObjectURL = null;
+  }
+  customUploadedFont = null;
+  if (customFontStyleEl) customFontStyleEl.textContent = '';
+  const removeBtn = document.getElementById('cfgCustomFontRemove');
+  if (removeBtn) removeBtn.style.display = 'none';
+  return deleteCustomFontFromIDB();
+}
+
+function updateCustomFontRemoveVisibility() {
+  const removeBtn = document.getElementById('cfgCustomFontRemove');
+  if (removeBtn) removeBtn.style.display = customUploadedFont ? '' : 'none';
+}
+
+function applyCustomFont(blob, format) {
+  if (customFontObjectURL) {
+    URL.revokeObjectURL(customFontObjectURL);
+    customFontObjectURL = null;
+  }
+  customFontObjectURL = URL.createObjectURL(blob);
+  const fontFormat = format === 'otf' ? 'opentype' : 'truetype';
+  if (!customFontStyleEl) {
+    customFontStyleEl = document.createElement('style');
+    customFontStyleEl.id = 'custom-uploaded-font';
+    document.head.appendChild(customFontStyleEl);
+  }
+  customFontStyleEl.textContent = `@font-face{font-family:'UploadedFont';src:url('${customFontObjectURL}') format('${fontFormat}');font-weight:normal;font-style:normal;}`;
+  customUploadedFont = { name: 'UploadedFont', label: 'Uploaded', sub: 'Custom font (saved locally)', weight: 'normal' };
+  updateCustomFontRemoveVisibility();
+  return document.fonts.load(`12px UploadedFont`);
+}
 
 function getConfig() {
   return {
@@ -170,8 +256,10 @@ function drawAvatar(font, opts) {
              font.name === 'Lobster' ? 52 :
              font.name === 'Caveat' ? 62 :
              font.name === 'Bangers' ? 68 :
-             font.name === 'CBHand' ? 54 :
-             font.name === 'Segoe UI' ? 52 : 56;
+             font.name === 'CBHandwritten' ? 54 :
+             font.name === 'Upheavtt' ? 68 :
+             font.name === 'Segoe UI' ? 52 :
+             font.name === 'UploadedFont' ? 54 : 56;
   const fontSize = Math.round(baseFontSize * fontScale);
 
   const weight = bold ? 'bold' : (font.weight || 'normal');
@@ -195,8 +283,9 @@ function buildGrid() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
   const opts = getConfig();
+  const fontsToShow = customUploadedFont ? [...fonts, customUploadedFont] : fonts;
 
-  fonts.forEach(font => {
+  fontsToShow.forEach(font => {
     const canvas = drawAvatar(font, opts);
     const card = document.createElement('div');
     card.className = 'card';
@@ -303,6 +392,26 @@ function setupConfigListeners() {
       }).catch(() => {}).finally(() => { matchInput.value = ''; });
     });
   }
+
+  const fontUploadInput = document.getElementById('cfgCustomFontUpload');
+  if (fontUploadInput) {
+    fontUploadInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const isOtf = (file.name || '').toLowerCase().endsWith('.otf');
+      const format = isOtf ? 'otf' : 'ttf';
+      saveCustomFontToIDB(file, format).then(() => applyCustomFont(file, format)).then(() => {
+        buildGrid();
+      }).catch(() => {}).finally(() => { fontUploadInput.value = ''; });
+    });
+  }
+
+  const fontRemoveBtn = document.getElementById('cfgCustomFontRemove');
+  if (fontRemoveBtn) {
+    fontRemoveBtn.addEventListener('click', () => {
+      removeCustomFont().then(() => buildGrid());
+    });
+  }
 }
 
 function loadAllFonts() {
@@ -313,8 +422,15 @@ function loadAllFonts() {
 
 document.fonts.ready
   .then(() => loadAllFonts())
+  .then(() => loadCustomFontFromIDB())
+  .then((stored) => {
+    if (stored && stored.blob && stored.format) {
+      return applyCustomFont(stored.blob, stored.format);
+    }
+  })
   .then(() => {
     loadConfig();
     setupConfigListeners();
+    updateCustomFontRemoveVisibility();
     buildGrid();
   });
