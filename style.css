@@ -148,10 +148,6 @@ h1 {
   box-shadow: 0 8px 28px rgba(255,153,32,0.5);
 }
 
-.grid.blur-icons .card canvas {
-  filter: blur(var(--blur-amount, 0.8px));
-}
-
 .card-label {
   color: #ccc;
   font-size: 13px;

@@ -288,7 +288,7 @@ function loadConfig() {
 }
 
 function drawAvatar(font, opts) {
-  const { text, bg, textColor, fontScale, size, offsetX, offsetY, rotateDeg, bold, italic } = opts;
+  const { text, bg, textColor, fontScale, size, offsetX, offsetY, rotateDeg, bold, italic, blurAmount } = opts;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -322,6 +322,18 @@ function drawAvatar(font, opts) {
   ctx.rotate(rotateDeg * Math.PI / 180);
   ctx.fillText(text, 0, 0);
   ctx.restore();
+
+  const blurPx = (blurAmount || 0) * 0.2;
+  if (blurPx > 0) {
+    const c2 = document.createElement('canvas');
+    c2.width = size;
+    c2.height = size;
+    const ctx2 = c2.getContext('2d');
+    ctx2.filter = `blur(${blurPx}px)`;
+    ctx2.drawImage(canvas, 0, 0);
+    ctx.clearRect(0, 0, size, size);
+    ctx.drawImage(c2, 0, 0);
+  }
 
   return canvas;
 }
@@ -364,10 +376,6 @@ function buildGrid() {
     card.appendChild(btn);
     grid.appendChild(card);
   });
-  const blurRaw = Math.min(20, Math.max(0, Number(document.getElementById('cfgBlurAmount') && document.getElementById('cfgBlurAmount').value) || 0));
-  const blurOn = blurRaw > 0;
-  grid.classList.toggle('blur-icons', blurOn);
-  if (blurOn) grid.style.setProperty('--blur-amount', (blurRaw * 0.2) + 'px');
   applyPageFontClass();
 }
 
