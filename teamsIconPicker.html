@@ -77,6 +77,13 @@
         <label for="cfgItalic">Italic</label>
       </div>
     </div>
+    <div class="config-group">
+      <label>Preview blur</label>
+      <div class="slider-input-row" title="0 = off, 20 ≈ 4px blur">
+        <input type="range" id="cfgBlurAmount" min="0" max="20" value="0" step="1">
+        <input type="number" id="cfgBlurAmountNum" min="0" max="20" value="0" step="1" aria-label="Blur (0 = off, 20 ≈ 4px)">
+      </div>
+    </div>
   </div>
 
   <div class="grid" id="grid"></div>

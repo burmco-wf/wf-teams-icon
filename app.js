@@ -1,5 +1,7 @@
 const STORAGE_KEY = 'teamsAvatarConfig';
 
+let pageFontActive = false;
+
 const defaultConfig = {
   text: 'TXT',
   bg: '#c7d4e7',
@@ -10,7 +12,8 @@ const defaultConfig = {
   offsetY: 0,
   rotateDeg: 0,
   bold: false,
-  italic: false
+  italic: false,
+  blurAmount: 0
 };
 
 const fonts = [
@@ -97,6 +100,44 @@ function updateCustomFontRemoveVisibility() {
   if (removeBtn) removeBtn.style.display = customUploadedFont ? '' : 'none';
 }
 
+function launchConfetti() {
+  const colors = ['#ff0f0f', '#ff8c00', '#ffef0f', '#0f0', '#0ff', '#4b0ff0', '#ff0f8c', '#fff'];
+  const count = 65;
+  const container = document.createElement('div');
+  container.setAttribute('aria-hidden', 'true');
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti';
+    piece.style.left = '50%';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = (6 + Math.random() * 2) + 's';
+    piece.style.setProperty('--fan', ((Math.random() - 0.5) * 100) + 'vw');
+    container.appendChild(piece);
+  }
+  document.body.appendChild(container);
+  setTimeout(() => container.remove(), 9500);
+}
+
+function applyPageFontClass() {
+  const on = pageFontActive;
+  const add = (el, ...classes) => {
+    if (!el) return;
+    if (on) el.classList.add('use-my-font', ...classes);
+    else el.classList.remove('use-my-font', 'h1-size', 'label-size', 'input-size', 'file-size');
+  };
+  const h1 = document.querySelector('h1');
+  add(h1, 'h1-size');
+  add(document.querySelector('p.hint'));
+  document.querySelectorAll('.card-label').forEach(el => add(el));
+  document.querySelectorAll('.card-sub').forEach(el => add(el));
+  document.querySelectorAll('.download-btn').forEach(el => add(el));
+  document.querySelectorAll('.config-group label').forEach(el => add(el, 'label-size'));
+  document.querySelectorAll('.config-group input[type="text"], .config-group input[type="number"]').forEach(el => add(el, 'input-size'));
+  document.querySelectorAll('.config-group input[type="file"]').forEach(el => add(el, 'file-size'));
+  add(document.querySelector('.remove-font-btn'));
+  document.querySelectorAll('.font-scale-value, .slider-value').forEach(el => add(el));
+}
+
 function applyCustomFont(blob, format) {
   if (customFontObjectURL) {
     URL.revokeObjectURL(customFontObjectURL);
@@ -126,7 +167,8 @@ function getConfig() {
     offsetY: Number(document.getElementById('cfgOffsetY').value),
     rotateDeg: Number(document.getElementById('cfgRotate').value),
     bold: document.getElementById('cfgBold').checked,
-    italic: document.getElementById('cfgItalic').checked
+    italic: document.getElementById('cfgItalic').checked,
+    blurAmount: Math.min(20, Math.max(0, Number(document.getElementById('cfgBlurAmount') && document.getElementById('cfgBlurAmount').value) || 0))
   };
 }
 
@@ -142,7 +184,8 @@ function saveConfig() {
     offsetY: Number(document.getElementById('cfgOffsetY').value),
     rotateDeg: Number(document.getElementById('cfgRotate').value),
     bold: document.getElementById('cfgBold').checked,
-    italic: document.getElementById('cfgItalic').checked
+    italic: document.getElementById('cfgItalic').checked,
+    blurAmount: Math.min(20, Math.max(0, Number(document.getElementById('cfgBlurAmount') && document.getElementById('cfgBlurAmount').value) || 0))
   };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(raw));
@@ -235,8 +278,12 @@ function loadConfig() {
     el('cfgRotate', cfg.rotateDeg);
     const boldEl = document.getElementById('cfgBold');
     const italicEl = document.getElementById('cfgItalic');
+    const blurAmountEl = document.getElementById('cfgBlurAmount');
+    const blurAmountNumEl = document.getElementById('cfgBlurAmountNum');
     if (boldEl) boldEl.checked = !!cfg.bold;
     if (italicEl) italicEl.checked = !!cfg.italic;
+    if (blurAmountEl) blurAmountEl.value = Math.min(20, Math.max(0, cfg.blurAmount ?? 0));
+    if (blurAmountNumEl) blurAmountNumEl.value = Math.min(20, Math.max(0, cfg.blurAmount ?? 0));
   } catch (e) {}
 }
 
@@ -317,13 +364,19 @@ function buildGrid() {
     card.appendChild(btn);
     grid.appendChild(card);
   });
+  const blurRaw = Math.min(20, Math.max(0, Number(document.getElementById('cfgBlurAmount') && document.getElementById('cfgBlurAmount').value) || 0));
+  const blurOn = blurRaw > 0;
+  grid.classList.toggle('blur-icons', blurOn);
+  if (blurOn) grid.style.setProperty('--blur-amount', (blurRaw * 0.2) + 'px');
+  applyPageFontClass();
 }
 
 const sliderNumPairs = [
   { slider: 'cfgFontScale', num: 'cfgFontScaleNum', min: 50, max: 150 },
   { slider: 'cfgOffsetX', num: 'cfgOffsetXNum', min: -50, max: 50 },
   { slider: 'cfgOffsetY', num: 'cfgOffsetYNum', min: -50, max: 50 },
-  { slider: 'cfgRotate', num: 'cfgRotateNum', min: -180, max: 180 }
+  { slider: 'cfgRotate', num: 'cfgRotateNum', min: -180, max: 180 },
+  { slider: 'cfgBlurAmount', num: 'cfgBlurAmountNum', min: 0, max: 20 }
 ];
 
 function syncSliderToNum(sliderId, numId) {
@@ -344,7 +397,7 @@ function syncNumToSlider(sliderId, numId, min, max) {
 }
 
 function setupConfigListeners() {
-  const inputs = ['cfgTextValue', 'cfgBg', 'cfgText', 'cfgFontScale', 'cfgSize', 'cfgOffsetX', 'cfgOffsetY', 'cfgRotate', 'cfgBold', 'cfgItalic'];
+  const inputs = ['cfgTextValue', 'cfgBg', 'cfgText', 'cfgFontScale', 'cfgSize', 'cfgOffsetX', 'cfgOffsetY', 'cfgRotate', 'cfgBold', 'cfgItalic', 'cfgBlurAmount'];
   inputs.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -412,6 +465,30 @@ function setupConfigListeners() {
       removeCustomFont().then(() => buildGrid());
     });
   }
+
+  const konami = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+  let konamiIndex = 0;
+  document.addEventListener('keydown', (e) => {
+    if (e.keyCode === konami[konamiIndex]) {
+      konamiIndex++;
+      if (konamiIndex === konami.length) {
+        konamiIndex = 0;
+        pageFontActive = !pageFontActive;
+        document.body.classList.toggle('corvinami-mode', pageFontActive);
+        applyPageFontClass();
+        if (pageFontActive) {
+          launchConfetti();
+          const popup = document.createElement('div');
+          popup.className = 'corvinami-popup';
+          popup.textContent = 'Corvinami Code';
+          document.body.appendChild(popup);
+          setTimeout(() => popup.remove(), 2200);
+        }
+      }
+    } else {
+      konamiIndex = 0;
+    }
+  });
 }
 
 function loadAllFonts() {
@@ -433,4 +510,5 @@ document.fonts.ready
     setupConfigListeners();
     updateCustomFontRemoveVisibility();
     buildGrid();
+    applyPageFontClass();
   });

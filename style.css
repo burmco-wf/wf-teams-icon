@@ -25,6 +25,94 @@ body {
   gap: 32px;
 }
 
+/* Corvinami mode: rainbow background + readable text (body class toggled by Konami) */
+body.corvinami-mode {
+  background: linear-gradient(125deg, #ff0f0f 0%, #ff8c00 18%, #ffef0f 32%, #0f0 45%, #0ff 58%, #4b0ff0 72%, #ff0f8c 88%, #ff0f0f 100%);
+  background-attachment: fixed;
+}
+body.corvinami-mode .use-my-font {
+  color: #1a1a1a;
+  text-shadow: 0 0 1px #fff, 0 1px 2px rgba(255,255,255,0.9);
+}
+body.corvinami-mode .config-panel,
+body.corvinami-mode .card-label,
+body.corvinami-mode .card-sub { color: #1a1a1a; }
+body.corvinami-mode h1 { color: #0d0d0d; text-shadow: 0 0 2px #fff, 0 1px 3px rgba(255,255,255,0.9); }
+body.corvinami-mode p.hint { color: #333; }
+body.corvinami-mode .download-btn { color: #b35a00; border-color: #b35a00; background: rgba(255,255,255,0.4); }
+body.corvinami-mode .remove-font-btn { color: #8b2020; border-color: #8b2020; }
+
+.corvinami-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  padding: 40px 80px;
+  font-family: 'UploadedFont', 'CBHandwritten', cursive;
+  font-size: 4rem;
+  font-weight: bold;
+  color: #1a1a1a;
+  background: rgba(255,255,255,0.95);
+  border: 6px solid #4b0ff0;
+  border-radius: 24px;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.35);
+  text-shadow: 0 0 2px #fff;
+  animation: corvinami-pop 0.4s ease-out;
+}
+@keyframes corvinami-pop {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.confetti {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 9998;
+  border-radius: 2px;
+  animation: confetti-arc 6.5s ease-out forwards;
+}
+@keyframes confetti-arc {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0) rotate(0deg);
+  }
+  4% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--fan, 0)), -100vh) rotate(260deg);
+  }
+  28% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--fan, 0)), -100vh) rotate(260deg);
+  }
+  100% {
+    opacity: 0.3;
+    transform: translate(calc(-50% + var(--fan, 0)), 15vh) rotate(720deg);
+  }
+}
+
+/* Class added by JS to each text element when "Page in my font" is on */
+.use-my-font {
+  font-family: 'UploadedFont', 'CBHandwritten', cursive;
+  margin-bottom: -5px;
+  margin-right: 5px;
+}
+.use-my-font.h1-size { font-size: 45px; margin: -10px;}
+.use-my-font.card-label { font-size: 25px; }
+.use-my-font.card-sub { font-size: 19px; }
+.use-my-font.download-btn { font-size: 19px; }
+.use-my-font.hint { font-size: 30px; margin: -5px;}
+.use-my-font.label-size { font-size: 17px; }
+.use-my-font.input-size { font-size: 20px; }
+.use-my-font.file-size { font-size: 18px; }
+.use-my-font.remove-font-btn { font-size: 18px; }
+.use-my-font.font-scale-value,
+.use-my-font.slider-value { font-size: 18px; }
+
 h1 {
   color: #fff;
   font-size: 22px;
@@ -58,6 +146,10 @@ h1 {
 .card:hover canvas {
   transform: scale(1.08);
   box-shadow: 0 8px 28px rgba(255,153,32,0.5);
+}
+
+.grid.blur-icons .card canvas {
+  filter: blur(var(--blur-amount, 0.8px));
 }
 
 .card-label {
