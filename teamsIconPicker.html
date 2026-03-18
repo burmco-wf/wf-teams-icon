@@ -7,10 +7,17 @@
   <link href="style.css" rel="stylesheet">
 </head>
 <body>
-  <h1>Teams Avatar Generator</h1>
-  <p class="hint">Click on an image to download</p>
+  <div class="font-preview-strip font-preview-strip--left" id="fontPreviewStripLeft"></div>
 
-  <div class="config-panel">
+  <div class="content-container">
+    <h1>Teams Avatar Generator</h1>
+    <p class="hint">Click a font in the left or right strip to select it; the center preview shows your design. Download from the button below it.</p>
+
+    <div class="config-panel">
+    <div class="config-group">
+      <label>Base font size</label>
+      <input type="number" id="cfgBaseFontSize" value="54" min="10" max="120" step="1" title="Base size for the selected font">
+    </div>
     <div class="config-group">
       <label>Text</label>
       <input type="text" id="cfgTextValue" value="TXT" maxlength="20" placeholder="Text">
@@ -24,15 +31,15 @@
       <input type="color" id="cfgText" value="#001e4f" title="Text color">
     </div>
     <div class="config-group">
+      <label>Match from image</label>
+      <input type="file" id="cfgMatchImage" accept="image/*" title="Upload a Teams avatar to copy its background and text colors">
+    </div>
+    <div class="config-group">
       <label>Font size %</label>
       <div class="slider-input-row">
         <input type="range" id="cfgFontScale" min="50" max="150" value="100" step="5">
         <input type="number" id="cfgFontScaleNum" min="50" max="150" value="100" step="5" aria-label="Font size">
       </div>
-    </div>
-    <div class="config-group">
-      <label>Image size (px)</label>
-      <input type="number" id="cfgSize" min="64" max="256" value="128" step="8">
     </div>
     <div class="config-group">
       <label>Offset X</label>
@@ -55,16 +62,15 @@
         <input type="number" id="cfgRotateNum" min="-180" max="180" value="0" step="1" aria-label="Rotation">
       </div>
     </div>
+    <div class="config-group">
+      <label>Image size (px)</label>
+      <input type="number" id="cfgSize" min="64" max="256" value="128" step="8">
+    </div>
     <div class="config-group custom-font-group">
       <label>Custom font (saved locally)</label>
       <div class="custom-font-row">
-        <input type="file" id="cfgCustomFontUpload" accept=".ttf,.otf,font/ttf,font/otf" title="Upload a TTF or OTF font; stored in browser and persists across reloads">
-        <button type="button" id="cfgCustomFontRemove" class="remove-font-btn" title="Remove saved custom font" style="display: none;">Remove</button>
+        <input type="file" id="cfgCustomFontUpload" accept=".ttf,.otf,font/ttf,font/otf" multiple title="Upload TTF or OTF fonts; stored in browser and persist across reloads">
       </div>
-    </div>
-    <div class="config-group">
-      <label>Match from image</label>
-      <input type="file" id="cfgMatchImage" accept="image/*" title="Upload a Teams avatar to copy its background and text colors">
     </div>
     <div class="config-group">
       <label>Font style</label>
@@ -84,9 +90,58 @@
         <input type="number" id="cfgBlurAmountNum" min="0" max="20" value="0" step="1" aria-label="Blur (0 = off, 20 ≈ 4px)">
       </div>
     </div>
+    <div class="config-group config-reset-group">
+      <label>&nbsp;</label>
+      <button type="button" id="cfgResetToDefault" class="reset-to-default-btn" title="Reset all options to default values">↺ Reset to default</button>
+    </div>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <div id="charTray" class="char-tray" style="display:none"></div>
+
+  <div id="charEditPanel" class="char-edit-panel" style="display:none">
+    <div class="char-edit-left">
+      <span class="char-edit-label">Editing</span>
+      <strong id="charEditLabel" class="char-edit-char"></strong>
+      <button id="charEditReset" class="char-edit-reset" title="Reset to global defaults">↺ Reset</button>
+    </div>
+    <div class="char-edit-body">
+      <div class="submenu-inline-group">
+        <label for="charEditFont">Font</label>
+        <select id="charEditFont" class="char-edit-select"></select>
+      </div>
+      <div class="submenu-inline-group">
+        <label for="charEditSize">Size</label>
+        <input type="number" id="charEditSize" step="1">
+      </div>
+      <div class="submenu-inline-group">
+        <label for="charEditColor">Color</label>
+        <input type="color" id="charEditColor">
+      </div>
+      <div class="submenu-inline-group">
+        <input type="checkbox" id="charEditBgEnabled">
+        <label for="charEditBgEnabled">Background</label>
+        <input type="color" id="charEditBgColor" value="#ffffff" disabled></div>
+      <div class="submenu-inline-group">
+        <input type="checkbox" id="charEditBold">
+        <label for="charEditBold">Bold</label>
+      </div>
+      <div class="submenu-inline-group">
+        <input type="checkbox" id="charEditItalic">
+        <label for="charEditItalic">Italic</label>
+      </div>
+    </div>
+    <button id="charEditClose" class="char-edit-close" aria-label="Close">×</button>
+  </div>
+
+    <div class="center-editor">
+      <canvas id="centerCanvas"></canvas>
+      <div class="center-actions">
+        <button type="button" id="centerDownloadBtn" class="download-btn">⬇ Download</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="font-preview-strip font-preview-strip--right" id="fontPreviewStripRight"></div>
 
   <script src="app.js"></script>
 </body>
