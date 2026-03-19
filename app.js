@@ -139,7 +139,7 @@ function applyCustomFont(blob, format, label, id) {
   customUploadedFonts.push(entry);
   rebuildCustomFontStyle();
   updatePageFontVariable();
-  return document.fonts.load(`12px ${fontFamily}`);
+  return document.fonts.load(`normal 12px "${fontFamily}"`).catch(() => {});
 }
 
 function removeCustomFontById(id) {
@@ -1060,13 +1060,13 @@ document.fonts.ready
   .then(() => loadAllFonts())
   .then(() => loadCustomFontsFromIDB())
   .then((list) => {
-    (list || []).forEach((item) => {
-      if (item && item.blob && item.format && item.id) {
-        applyCustomFont(item.blob, item.format, item.fileName || 'Custom', item.id);
-      }
-    });
+    const loads = (list || [])
+      .filter((item) => item && item.blob && item.format && item.id)
+      .map((item) => applyCustomFont(item.blob, item.format, item.fileName || 'Custom', item.id));
     updatePageFontVariable();
+    return Promise.all(loads);
   })
+  .catch(() => {})
   .then(() => {
     loadConfig();
     setupConfigListeners();
